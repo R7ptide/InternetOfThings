@@ -57,6 +57,7 @@ def collect(args):
     print("Hold the object in position. Ctrl+C to stop early.")
 
     saved = 0
+    last = None  # the sensor updates slower than the board prints, so skip repeated readings
     with serial.Serial(port, args.baud, timeout=2) as ser, open(out, "a", newline="") as f:
         writer = csv.writer(f)
         if new_file:
@@ -69,8 +70,9 @@ def collect(args):
                     continue
                 r, g, b, clear, prox = values
                 total = r + g + b
-                if total == 0:
+                if total == 0 or (r, g, b, clear) == last:
                     continue
+                last = (r, g, b, clear)
                 shares = (r / total, g / total, b / total)
                 writer.writerow([int(time.time() * 1000), args.label, r, g, b, clear, prox,
                                  f"{shares[0]:.3f}", f"{shares[1]:.3f}", f"{shares[2]:.3f}"])
