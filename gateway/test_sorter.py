@@ -120,6 +120,23 @@ def test_stale_color_and_busy_item_are_ignored():
     assert f.sent == [] and f.seq.item_id == 1
 
 
+def test_stopped_belt_is_started_when_idle():
+    f = Fake()
+    f.msg("line/status", belt="stopped")
+    assert f.actions() == [{"action": "belt", "state": "run", "speed_pct": sorter.BELT_SPEED_PCT}]
+    f.clear()
+    f.msg("line/status", belt="running")
+    assert f.actions() == []
+
+
+def test_stopped_belt_is_left_alone_while_busy():
+    f = Fake()
+    f.item()  # the UNO stops the belt itself and reports it
+    f.clear()
+    f.msg("line/status", belt="stopped")
+    assert f.actions() == []
+
+
 def test_confirmation_for_another_item_does_not_release():
     f = Fake()
     f.item(5)

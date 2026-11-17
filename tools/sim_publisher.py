@@ -18,22 +18,33 @@ commands = queue.Queue()
 seq = 0
 
 
+def publish(client, topic, payload, device, retain=False):
+    global seq
+    seq += 1
+    payload = {"device": device, "seq": seq, **payload}
+    client.publish(f"{ROOT}/{topic}", json.dumps(payload), qos=1, retain=retain)
+
+
+def publish_status(client, running):
+    # like the real UNO: retained, so a gateway that starts later still sees it
+    publish(client, "line/status",
+            {"belt": "running" if running else "stopped", "speed_pct": 30 if running else 0, "diverter_deg": 90},
+            "uno1", retain=True)
+
+
 def on_connect(client, userdata, flags, reason_code, properties):
     client.subscribe(f"{ROOT}/line/cmd", qos=1)
+    publish_status(client, running=False)  # the belt starts stopped
 
 
 def on_message(client, userdata, msg):
     try:
-        commands.put(json.loads(msg.payload))
+        cmd = json.loads(msg.payload)
     except ValueError:
-        pass
-
-
-def publish(client, topic, payload, device):
-    global seq
-    seq += 1
-    payload = {"device": device, "seq": seq, **payload}
-    client.publish(f"{ROOT}/{topic}", json.dumps(payload), qos=1)
+        return
+    if cmd.get("action") == "belt":
+        publish_status(client, running=cmd.get("state") == "run")
+    commands.put(cmd)
 
 
 def wait_for(predicate, timeout):
@@ -65,6 +76,7 @@ def main():
         item_id += 1
         true_color = random.choice(COLORS)
         publish(client, "line/item", {"item_id": item_id, "event": "detected"}, "uno1")
+        publish_status(client, running=False)  # the UNO stops the belt itself when it sees an item
         print(f"item {item_id} ({true_color}) detected")
 
         for _ in range(READINGS):

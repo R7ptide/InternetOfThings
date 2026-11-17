@@ -74,6 +74,15 @@ class Sequencer:
                 self._on_color(data)
             elif topic.endswith("/line/bin"):
                 self._on_bin(data)
+            elif topic.endswith("/line/status"):
+                self._on_status(data)
+
+    def _on_status(self, data):
+        # The UNO publishes a retained status on (re)connect. If the belt is stopped and nothing is being
+        # processed, start it. This also covers the gateway starting after the UNO, and a UNO reboot.
+        if data.get("belt") == "stopped" and self.state == IDLE:
+            self.log("belt is stopped and the line is idle, starting it")
+            self.start_belt()
 
     def _on_item(self, data):
         if data.get("event") != "detected":
@@ -130,9 +139,8 @@ def main():
 
     def on_connect(client, userdata, flags, reason_code, properties):
         print("connected to broker:", reason_code)
-        for topic in ("line/item", "color/classification", "line/bin"):
+        for topic in ("line/item", "color/classification", "line/bin", "line/status"):
             client.subscribe(f"{ROOT}/{topic}", qos=1)
-        sequencer.start_belt()
 
     client.on_connect = on_connect
     client.on_message = lambda c, u, msg: sequencer.on_message(msg.topic, msg.payload)
