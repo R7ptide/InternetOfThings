@@ -1,25 +1,26 @@
-const int TRIG_PIN = 7;
-const int ECHO_PIN = 8;
+const int SENSOR_PIN = A0;
+const float MAX_RANGE_CM = 520.0;
+const int ADC_MAX = 1023;  // 10-bit ADC
 
 void setup() {
   Serial.begin(115200);
-  pinMode(TRIG_PIN, OUTPUT);
-  pinMode(ECHO_PIN, INPUT);
+  analogReadResolution(10);  // the R4 defaults to 10 bits
 }
 
 void loop() {
-  digitalWrite(TRIG_PIN, LOW);
-  delayMicroseconds(2);
-  digitalWrite(TRIG_PIN, HIGH);
-  delayMicroseconds(10);
-  digitalWrite(TRIG_PIN, LOW);
-
-  unsigned long us = pulseIn(ECHO_PIN, HIGH, 30000);  // 30 ms timeout
-  if (us == 0) {
-    Serial.println("no echo (nothing in range, or TRIG/ECHO wired wrong)");
-  } else {
-    Serial.print(us / 58.0, 1);
-    Serial.println(" cm");
+  // average a few samples to smooth the analog noise
+  long sum = 0;
+  for (int i = 0; i < 8; i++) {
+    sum += analogRead(SENSOR_PIN);
+    delay(2);
   }
+  float raw = sum / 8.0;
+  float cm = raw * MAX_RANGE_CM / ADC_MAX;
+
+  Serial.print("raw ");
+  Serial.print(raw, 0);
+  Serial.print("  ->  ");
+  Serial.print(cm, 1);
+  Serial.println(" cm");
   delay(200);
 }
