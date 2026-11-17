@@ -1,7 +1,3 @@
-// Nano 33 BLE Sense (Rev2): read color from the on-board APDS-9960 and print over serial.
-// Library: "Arduino_APDS9960" (Library Manager). Board: Arduino Mbed OS Nano Boards.
-// Goal for the checkpoint: see distinct RGB values for red / green / blue objects.
-// Next: log samples as CSV for training, then BLE + TinyML classifier.
 #include <Arduino_APDS9960.h>
 
 void setup() {
@@ -23,9 +19,8 @@ void loop() {
   APDS.readColor(r, g, b, c);
 
   int proximity = -1;
-  if (APDS.proximityAvailable()) proximity = APDS.readProximity();  // 0 = close, 255 = far
+  if (APDS.proximityAvailable()) proximity = APDS.readProximity();  // 0 -> close, 255 -> far
 
-  // CSV: easy to paste into a spreadsheet or save for the ML dataset
   Serial.print(r); Serial.print(',');
   Serial.print(g); Serial.print(',');
   Serial.print(b); Serial.print(',');

@@ -1,11 +1,3 @@
-"""Compare color classifiers on ml/data/colors.csv.
-
-    python ml/train.py [--csv ml/data/colors.csv] [--no-clear]
-
-Samples are logged in time order, so neighbors are near-identical. A random split would leak and
-overstate accuracy. Instead the rows of each label are cut into consecutive blocks and whole blocks
-are held out (GroupKFold), which is closer to "new object, new moment".
-"""
 import argparse
 import csv
 import os

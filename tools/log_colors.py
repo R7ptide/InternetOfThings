@@ -1,12 +1,3 @@
-"""Log color samples from the Nano (color-station.ino) to a labeled CSV, and summarize them.
-
-Collect:   python tools/log_colors.py --label red --samples 30
-Summary:   python tools/log_colors.py --summary
-
-Close the Arduino Serial Monitor first: only one program can use the port at a time.
-Samples are appended to ml/data/colors.csv with columns:
-  ts,label,r,g,b,clear,proximity,r_share,g_share,b_share
-"""
 import argparse
 import csv
 import os
