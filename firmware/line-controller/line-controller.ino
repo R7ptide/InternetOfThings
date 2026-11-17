@@ -19,7 +19,8 @@ const unsigned long DIVERT_HOLD_MS = 700;
 const int BELT_STOP_ANGLE = 90;  // continuous servo: 90 = stop
 const int BELT_DEFAULT_PCT = 30;
 
-const float ITEM_DROP_CM = 3.0;               // item = distance this much closer than the empty belt
+const bool STOP_BELT_ON_ITEM = true;          // stop immediately, without waiting for the gateway
+const float ITEM_DROP_CM = 3.0;              // item = distance this much closer than the empty belt
 const unsigned long ITEM_CLEAR_MS = 400;      // distance must stay normal this long to end an item
 const unsigned long TELEMETRY_MS = 500;
 const unsigned long RECONNECT_MS = 3000;
@@ -195,6 +196,7 @@ void detectItems() {
     publish("item", doc);
     Serial.print("item ");
     Serial.println(lastItemId);
+    if (STOP_BELT_ON_ITEM && beltPct != 0) setBelt(0);  // stop-and-read: the gateway restarts it
   } else if (!close && itemPresent) {
     if (clearSince == 0) clearSince = now;
     if (now - clearSince > ITEM_CLEAR_MS) itemPresent = false;
