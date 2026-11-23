@@ -4,7 +4,7 @@
 #include <Servo.h>
 #include "secrets.h"
 
-const int DISTANCE_PIN = A0;
+const int DISTANCE_PIN = A5;
 const int DIVERTER_PIN = 9;
 const int BELT_PIN = 6;
 
