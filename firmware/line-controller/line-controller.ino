@@ -170,7 +170,14 @@ void connectWifi() {
 void tryConnectMqtt() {
   mqtt.setId(DEVICE);
   if (!mqtt.connect(MQTT_HOST, MQTT_PORT)) {
-    Serial.println("mqtt not connected, will retry");
+    Serial.print("mqtt not connected, error ");
+    Serial.print(mqtt.connectError());
+    Serial.print(", broker ");
+    Serial.print(MQTT_HOST);
+    Serial.print(":");
+    Serial.print(MQTT_PORT);
+    Serial.print(", my ip ");
+    Serial.println(WiFi.localIP());
     return;
   }
   mqtt.onMessage(onCommand);
